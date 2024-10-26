@@ -1,0 +1,11 @@
+# Copyright Disclaimer
+
+We, the authors of this work, hereby disclaim all copyright interest in the notebooks and code submitted as part of the PRC Data Challenge 2024, which predicts Estimated Aircraft Take-Off Mass. 
+
+Signed, 
+
+Antonio P. Barata
+Bernard Bronmans
+Victor Ciulei
+
+28.10.2024
