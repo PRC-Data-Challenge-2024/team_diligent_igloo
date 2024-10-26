@@ -1,0 +1,1 @@
+conda install -c conda-forge numpy scipy scikit-learn numba xgboost cupy folium matplotlib mapclassify branca shapely geopandas ipywidgets tqdm freetype=2.10.4
