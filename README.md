@@ -3,7 +3,7 @@
 Team members: Antonio Pereira Barata, Bernard Bronmans, Victor Ciulei (teamlead), members of the Innovation and Datalab, Human Environment and Transportation Inspectorate, Ministry of Infrastructure and Water Management, Dutch Government.  
 
 ## Introduction
-Welcome to the Gitlab Repo of our team. Please read this file carefully to understand the approach we took on predicting the estimate Take-Off Mass as part of the competition organized by the Performance Review Comission of EUROCONTROL. We include here detailed information about the feature engineering process, extra data we used, libraries, models, hardware used and runtime.
+Welcome to the Gitlab Repo of our team. Please read this file carefully to understand the approach we took on predicting the estimate Take-Off Mass as part of the competition organized by the Performance Review Comission of EUROCONTROL. We include here detailed information about the feature engineering process, extra data we used, libraries, models. We're very happy with the work we did in 16 days of competition.
 
 ## The Why behind the Why
 
@@ -17,34 +17,19 @@ The PRC (and many other Organizations, industrial actors and academia by the way
 
 ## Prerequisites on running the notebooks
 
-We have worked with Python in Jupyter Notebooks. Consider running `conda env create -f conda_install.txt` using the file provided to install all the libraries. The notebooks were ran on the GPU machine locally, hence the use of torch and CUDA. Additionally we have worked with our own datafolder paths, those would also need to be properly selected. Antonio please check. We parallelized some preprocessing using 12 cores on a 64 GB RAM laptop, using antything else will increase the preprocessing time (and hyperoptimization process re GPU) significantly.
+We have worked with Python in Jupyter Notebooks. Consider running the two lines in `conda_install.txt` to install all the libraries after creating a conda environment. The notebooks were ran on the GPU machine locally, hence the use of torch and CUDA. Additionally we have worked with our own datafolder paths, those would also need to be properly selected. We parallelized some preprocessing using 12 cores on a 64 GB RAM laptop, using antything else will increase the preprocessing time (and hyperoptimization process re GPU) significantly. We advise to chunk the hyperopt search as using the entire search just takes too long. 
 
 ## Usage
 
-If all libraries and data folders are in order, the notebooks should be ran in the order of the notebook names (except downloading the data, if the user already has it.)
+If all libraries and data folders are in order, the notebooks should be ran in the order of the notebook names (except downloading the data, if the user already has it.) The notebook 000FUEL should be ran as stated in the Acropole Github
 
 ## Our approach
 
-We decided to use an XGBoost model and performed a random search for the hyperparameter optimisation. We train the model  using a Stratified 5-Fold approach to ensure that the resulting best hyperparameters are robust for the final_submission file. The feature engineering is core to our approach and is described in the next paragraph. Antonio do we need to add anything more here?
+We decided to use an XGBoost model and performed a random search for the hyperparameter optimisation. We train the model  using a Stratified 5-Fold approach to ensure that the resulting best hyperparameters are robust for the final_submission file. The feature engineering is core to our approach and is described in the next paragraph. After preprocessing the flights and computing TAS, distances, bearing etc,  and resampling, we develop cyclic features, segment-based features, and statistical metrics. Cyclic features are extracted by mapping timestamp elements (hour of the day, day of the week, day of the month, and day of the year) onto a unit circle. This accounts for periodicity, such as daily or annual cycles, using sine and cosine transformations. Segment-based features are created by identifying segments within flights where the phase (e.g., takeoff, cruise, landing) changes, storing each phase's indices for analysis of intra- and inter-segment variability. Statistical metrics include measures such as mean, standard deviation, quantiles, and distances between waypoints. Additionally, phase-specific statistics and variability measures within quantile bins are calculated, allowing for insights into both global and segmented patterns in flight data. 
 
-## Feature Engineering
-We divide the features generated in 3 categories.
-
-- Trajectory features
-
-This type of feature comes directly from the preprocessing of the trajectory and on top of that generating custom statistics for a number of time windows, for each identified flight phase. We generate statistics for consecutive time windows of 8 seconds (mean, standard deviation etc) and then assess where each statistic would fall in the distribution (in which quantile) of the entire statistic for that phase (of just one flight), and for the entire dataset. This ensures that each statistic generated has both a local and a global reference. Antonio please add here what you see fit. Try to be as detailed as you can without becoming annoyed:) please.
-
-- Airport features
-
-Airport features are generated by creating a undirected graph network from the OD-pairs, and then using network measures to describe the airports. In addition we also use the bearing of the hypothetical direct OD-pair, the airport elevation and runway information as raw feature. Antonio do we actually use also runway info or just the elevation?
-
-- Aircraft features
-
+Other features types include the static ones, generated from airport and aircraft. Airport features are generated by creating a undirected graph network from the OD-pairs, and then using network measures to describe the airports. In addition we also use the bearing of the direct OD-pair, the airport elevation and runway information as raw features.
 The latest version of the model uses enriched aircraft information by collating physical aicraft data from the FAA, with information of fuelflow and emissions collected from the European Emissions Databank. We use engine-specific parameters, albeit the exact engine (subtype) or modifications are not always accurately represented in our model. We also expand on the Acropole model by adding new aircraft types for the fuelflow predictions. Some aircraft information is also added from that source. In addition we add the predicted fuel flow by Acropole as one of the features of our model.
 
-## Runtime
-
-All notebooks besides downloading the data take approx xx hrs using 12 cores and GPU with 64GB RAM. Antonio please fill a rough estimate
 ## What we didn't do
 
 We thought that it was not in the spirit of the competition to reverse engineer the flights and uncover airlines and the aircraft registration number, even though this was possible. Such information would have led to finding out the precise engine and engine type, its age and modifications, which would potentially improve the prediction power of our model. Something we also didn't manage to test in time was whether adding engine noise information would have helped the prediction.
